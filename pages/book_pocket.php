@@ -149,7 +149,7 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     $item_ids = substr_replace($item_ids, '', -1);
 
     // Query
-	$pocket_q = $dbs->query('SELECT i.item_code, i.biblio_id,i.call_number,b.title FROM item AS i LEFT JOIN biblio AS b ON b.biblio_id=i.biblio_id WHERE i.item_code IN('.$item_ids.')');
+	$pocket_q = $dbs->query('SELECT i.inventory_code, i.biblio_id,i.call_number,b.title FROM item AS i LEFT JOIN biblio AS b ON b.biblio_id=i.biblio_id WHERE i.item_code IN('.$item_ids.')');
     $pocket_datas = array();
     while ($pocket_d = $pocket_q->fetch_assoc()) {
         if ($pocket_d['item_code']) {
@@ -255,7 +255,7 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
 $table_spec = 'item AS i LEFT JOIN biblio AS b ON b.biblio_id=i.biblio_id';
 // create datagrid
 $datagrid = new simbio_datagrid();
-$datagrid->setSQLColumn('i.item_code','i.item_code AS \''.__('No Inventaris').'\'', 'i.call_number AS \''.__('No Panggil').'\'', 'b.title AS \''.__('Judul Buku').'\'');
+$datagrid->setSQLColumn('i.item_code','i.item_code AS \''.__('No Eksemplar').'\'', 'i.call_number AS \''.__('No Panggil').'\'', 'b.title AS \''.__('Judul Buku').'\'');
 $datagrid->setSQLorder('b.last_update DESC');
 // is there any search
 if (isset($_GET['keywords']) AND $_GET['keywords']) {
