@@ -20,33 +20,8 @@
  */
 
 /* Pocket Book print */
+use SLiMS\Plugins;
 
-// key to authenticate
-// define('INDEX_AUTH', '1');
-
-// // main system configuration
-// require '../../../sysconfig.inc.php';
-// // IP based access limitation
-// require LIB.'ip_based_access.inc.php';
-// do_checkIP('smc');
-// do_checkIP('smc-membership');
-// // start the session
-// require SB.'admin/default/session.inc.php';
-// require SB.'admin/default/session_check.inc.php';
-// require SIMBIO.'simbio_GUI/table/simbio_table.inc.php';
-// require SIMBIO.'simbio_GUI/form_maker/simbio_form_table_AJAX.inc.php';
-// require SIMBIO.'simbio_GUI/paging/simbio_paging.inc.php';
-// require SIMBIO.'simbio_DB/datagrid/simbio_dbgrid.inc.php';
-// require SIMBIO.'simbio_DB/simbio_dbop.inc.php';
-
-// // privileges checking
-// $can_read = utility::havePrivilege('bibliography', 'r');
-
-// if (!$can_read) {
-//     die('<div class="errorBox">You dont have enough privileges to view this section</div>');
-// }
-
-// IP based access limitation
 require LIB . 'ip_based_access.inc.php';
 do_checkIP('smc');
 do_checkIP('smc-bibliography');
@@ -70,7 +45,7 @@ if (!$can_read) {
 }
 
 // local settings
-$max_print = 8;
+$max_print = 2;
 
 // clean print queue
 if (isset($_GET['action']) AND $_GET['action'] == 'clear') {
@@ -87,7 +62,7 @@ if (isset($_POST['itemID']) AND !empty($_POST['itemID']) AND isset($_POST['itemA
     }
     if (!is_array($_POST['itemID'])) {
         // make an array
-        $_POST['itemID'] = array($_POST['itemID']);
+       $_POST['itemID'] = array((integer)$_POST['itemID']);
     }
     // loop array
     if (isset($_SESSION['pocket'])) {
@@ -95,36 +70,30 @@ if (isset($_POST['itemID']) AND !empty($_POST['itemID']) AND isset($_POST['itemA
     } else {
         $print_count = 0;
     }
-    // card size
-    $size = 2;
-    // create AJAX request
-    echo '<script type="text/javascript" src="'.JWB.'jquery.js"></script>';
-    echo '<script type="text/javascript">';
+    
     // loop array
-    foreach ($_POST['itemID'] as $itemID) {
-        if ($print_count == $max_print) {
-            $limit_reach = true;
-            break;
-        }
-        if (isset($_SESSION['pocket'][$itemID])) {
-            continue;
-        }
-        if (!empty($itemID)) {
-            //$pocket_text = trim($itemID);
-            //echo '$.ajax({url: \''.SWB.'lib/phpbarcode/barcode.php?code='.$pocket_text.'&encoding='.$sysconf['barcode_encoding'].'&scale='.$size.'&mode=png\', type: \'GET\', error: function() { alert(\'Error creating pocket book!\'); } });'."\n";
-            // add to sessions
-            $_SESSION['pocket'][$itemID] = $itemID;
-            $print_count++;
-        }
-    }
-    echo '</script>';
-    if (isset($limit_reach)) {
+	foreach ($_POST['itemID'] as $itemID) {
+		if ($print_count == $max_print) {
+			$limit_reach = true;
+			break;
+		}
+
+		if (isset($_SESSION['pocket'][$itemID])) {
+			continue;
+		}
+
+		$_SESSION['pocket'][$itemID] = $itemID;
+        $print_count++;
+	}
+
+	// update print queue count object
+	if (isset($limit_reach)) {
         $msg = str_replace('{max_print}', $max_print, __('Selected items NOT ADDED to print queue. Only {max_print} can be printed at once')); //mfc
-        utility::jsAlert($msg);
+        utility::jsToastr(__('Print Catalog Format'), $msg, 'warning');
     } else {
         // update print queue count object
-        echo '<script type="text/javascript">parent.$(\'#queueCount\').html(\''.$print_count.'\');</script>';
-        utility::jsAlert(__('Selected items added to print queue'));
+        echo '<script type="text/javascript">parent.$(\'#queueCount\').html(\'' . $print_count . '\');</script>';
+        utility::jsToastr(__('Print Catalog Format'), __('Selected items added to print queue'), 'success');
     }
     exit();
 }
@@ -182,7 +151,7 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     $html_str .= '<style type="text/css">'."\n";
     $html_str .= 'label {font-size: 11.5pt;}'."\n";
     $html_str .= 'p {margin: 0;}'."\n";
-    $html_str .= '.trapesium { margin-bottom: 5cm;background: url("../images/kantong.png");background-size: 11cm 12cm;background-repeat: no-repeat;width: 11cm;height: 12cm;float: left;}'."\n";
+    $html_str .= '.trapesium { margin-bottom: 5cm;background: url("'.SWB.'plugins/kantong-buku/images/kantong.png");background-size: 11cm 12cm;background-repeat: no-repeat;width: 11cm;height: 12cm;float: left;}'."\n";
     $html_str .= '.isi {padding-top: 320px;padding-left: 100px;}'."\n";              
     $html_str .= '</style>'."\n";
     $html_str .= '</head>'."\n";
